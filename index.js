@@ -14,7 +14,7 @@ const entryRoutes = require('./routes/entryRoutes');
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cors({
-  origin: ["https://web-app-recruitment-8s5wfvnwp-asadtanvirshami.vercel.app"],
+  origin: ["https://web-app-recruitment-nds4hy31h-asadtanvirshami.vercel.app"],
   methods: ["GET", "POST", "DELETE","UPDATE"],
   credentials: true,
 }));

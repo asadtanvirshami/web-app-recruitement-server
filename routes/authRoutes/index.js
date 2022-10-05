@@ -4,8 +4,7 @@ const jwt = require("jsonwebtoken");
 routes.use(cors());
 routes.use(
   cors({
-    // origin: ["https://blogging-site-8ydf7q6rp-asadtanvirshami.vercel.app"],
-    origin: ["http://localhost:3000"],
+    origin: ["https://web-app-recruitment-nds4hy31h-asadtanvirshami.vercel.app"],
     methods: ["GET", "POST", "DELETE", "UPDATE"],
     credentials: true,
   })
