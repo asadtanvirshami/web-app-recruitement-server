@@ -1,7 +1,15 @@
 const routes = require("express").Router();
 const { Users } = require("../../models");
 const jwt = require("jsonwebtoken");
-
+routes.use(cors());
+routes.use(
+  cors({
+    // origin: ["https://blogging-site-8ydf7q6rp-asadtanvirshami.vercel.app"],
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST", "DELETE", "UPDATE"],
+    credentials: true,
+  })
+);
 generateAccessToken = (authUser) => {
   return jwt.sign(
     {
@@ -20,7 +28,7 @@ routes.post("/loginAuth", async function (req, res) {
   // destructuring
   const { email, password } = req.body;
   const authUser = await Users.findOne({ where: { email: email } });
-  
+
   if (!authUser) {
     res.send({ message: "Failed" });
   } else if (authUser.password !== password) {
