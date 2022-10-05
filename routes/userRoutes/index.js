@@ -5,6 +5,7 @@ routes.use(cors());
 routes.use(
   cors({
     origin: ["https://web-app-recruitment-nds4hy31h-asadtanvirshami.vercel.app"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "DELETE", "UPDATE"],
     credentials: true,
   })
