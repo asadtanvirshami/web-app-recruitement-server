@@ -11,6 +11,7 @@
     "express": "^4.18.1",
     "express-session": "^1.17.3",
     "fs": "^0.0.1-security",
+    "heroku": "^7.64.0",
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
