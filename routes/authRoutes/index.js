@@ -1,6 +1,7 @@
 const routes = require("express").Router();
 const { Users } = require("../../models");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 routes.use(cors());
 routes.use(
   cors({

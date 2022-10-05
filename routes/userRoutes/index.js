@@ -1,5 +1,6 @@
 const routes = require("express").Router();
 const { Users } = require("../../models");
+const cors = require("cors");
 routes.use(cors());
 routes.use(
   cors({
