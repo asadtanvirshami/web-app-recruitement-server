@@ -1,16 +1,7 @@
 const routes = require("express").Router();
 const { Users } = require("../../models");
 const jwt = require("jsonwebtoken");
-const cors = require("cors");
-routes.use(cors());
-routes.use(
-  cors({
-    origin: ["https://web-app-recruitment-nds4hy31h-asadtanvirshami.vercel.app"],
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST", "DELETE", "UPDATE"],
-    credentials: true,
-  })
-);
+
 generateAccessToken = (authUser) => {
   return jwt.sign(
     {

@@ -1,15 +1,5 @@
 const routes = require("express").Router();
 const { Users } = require("../../models");
-const cors = require("cors");
-routes.use(cors());
-routes.use(
-  cors({
-    origin: ["https://web-app-recruitment-nds4hy31h-asadtanvirshami.vercel.app"],
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST", "DELETE", "UPDATE"],
-    credentials: true,
-  })
-);
 
 routes.post("/createUser", (req, res) => {
   // using same variable name as used in frontend
