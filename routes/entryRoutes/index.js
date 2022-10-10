@@ -107,7 +107,7 @@ routes.post("/sendMail", (req, res)  => {
     transEmailApi.sendTransacEmail({
       sender,
       to: recievers,
-      subject:'Welcome to Recruitment Company',
+      subject:'We are hiring!',
       //textContent:'Wishing you a warm welcome to Hail Technologies',
       htmlContent:`
       <p>Hello {{params.firstname}} {{params.lastname}},</p>
