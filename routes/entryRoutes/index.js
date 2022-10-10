@@ -89,9 +89,13 @@ routes.delete("/deleteEntry", async (req, res)  => {
 })
 
 routes.post("/sendMail", (req, res)  => {
-  console.log(req.body)
-  const email = req.body.email
-  const field = req.body.field
+    console.log(req.body)
+    const email = req.body.email
+    const field = req.body.field
+    const firstname  = req.body.firstname
+    const lastname  = req.body.lastname
+    const region = req.body.region;
+
     const client = Sib.ApiClient.instance
     const apiKey = client.authentications['api-key'];
     apiKey.apiKey = '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';
@@ -103,10 +107,11 @@ routes.post("/sendMail", (req, res)  => {
     transEmailApi.sendTransacEmail({
       sender,
       to: recievers,
-      subject:'Welcome to Innovatory',
+      subject:'Welcome to Recruitment Company',
       //textContent:'Wishing you a warm welcome to Hail Technologies',
       htmlContent:`
-      <p>We have an on going recruitment in Canada.</p>
+      <p>Hello {{params.firstname}} {{params.lastname}},</p>
+      <p>We have an on going recruitment in {{params.region}},Canada.</p>
       <p>We are glad to tell you that you are selected for the interview at our company.</p>
       <p >As we are hiring {{params.field}} in our company</p>
       <br/>
@@ -117,7 +122,10 @@ routes.post("/sendMail", (req, res)  => {
       `,
       params:{
         email:email,
-        field:field
+        field:field,
+        region:region,
+        firstname:firstname,
+        lastname:lastname
       },
     }).then((x)=>console.log(x))
     .catch((e)=>console.log(e));
