@@ -52,8 +52,10 @@ routes.get("/loginUser", (req, res) => {
 const verify = (req, res, next) => {
   // destructuring
   const token = req.headers["x-access-token"];
-  if (token){
-    jwt.verify(token, "mysecretkey", (err) => {
+  if (!token) {
+    res.send("Invalid");
+  } else {
+    jwt.verify(token, "mysecretkey", (err, users) => {
       if (err) {
         res.json({ auth: false, message: "not authorised" });
       } else {
