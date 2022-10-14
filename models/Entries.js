@@ -50,6 +50,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNyll: false,
            
         },
+        status:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
     });
 
 

@@ -88,13 +88,23 @@ routes.delete("/deleteEntry", async (req, res)  => {
     res.send([deleteEntry])
 })
 
-routes.post("/sendMail", (req, res)  => {
+routes.post("/sendMail", async (req, res)   => {
     console.log(req.body)
+    const id = req.body.id
     const email = req.body.email
     const field = req.body.field
     const firstname  = req.body.firstname
     const lastname  = req.body.lastname
     const region = req.body.region;
+    
+   
+      const EntriesData = await Entries.update(
+       {
+           status: "Sent"
+       }, 
+       {where:{ id: `${id}` }});
+       res.send([EntriesData])
+   
 
     const client = Sib.ApiClient.instance
     const apiKey = client.authentications['api-key'];
@@ -127,9 +137,7 @@ routes.post("/sendMail", (req, res)  => {
         firstname:firstname,
         lastname:lastname
       },
-    }).then((x)=>console.log(x))
-    .catch((e)=>console.log(e));
-    res.send(200);
+    })
 })
 
 
