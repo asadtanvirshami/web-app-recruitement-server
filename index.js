@@ -47,6 +47,6 @@ app.use("/entries", entryRoutes);
 var PORT = process.env.PORT || 8080
 
 app.listen(PORT, () => {
-  console.log(`App listening on port` + PORT);
+  console.log(`================Connected Successfully ${PORT}!================`);
   console.log('Press Ctrl+C to quit.');
 });
