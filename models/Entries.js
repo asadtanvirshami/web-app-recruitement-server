@@ -30,7 +30,22 @@ module.exports = (sequelize, DataTypes) => {
             allowNyll: false,
            
         },
-        linkedIn:{
+        source:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        source_link:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        resources:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        comments:{
             type:DataTypes.STRING,
             allowNyll: false,
            
@@ -40,7 +55,17 @@ module.exports = (sequelize, DataTypes) => {
             allowNyll: false,
            
         },
+        security_clearence:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
         experience:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        city:{
             type:DataTypes.STRING,
             allowNyll: false,
            
@@ -51,6 +76,21 @@ module.exports = (sequelize, DataTypes) => {
            
         },
         status:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        show_notification:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        sent_day:{
+            type:DataTypes.STRING,
+            allowNyll: false,
+           
+        },
+        sent_date:{
             type:DataTypes.STRING,
             allowNyll: false,
            
