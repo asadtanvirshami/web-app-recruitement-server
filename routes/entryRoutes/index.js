@@ -135,13 +135,15 @@ routes.post("/sendMail", async (req, res)   => {
     const region = req.body.region;
     const sent_day = req.body.sent_day;
     const sent_date = req.body.sent_date;
+    const subject = req.body.subject;
+    const txt_body = req.body.txt_body
     
     const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
     res.send([EntriesData])
    
     const client = Sib.ApiClient.instance
     const apiKey = client.authentications['api-key'];
-    apiKey.apiKey = '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';
+    apiKey.apiKey = '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';
     const transEmailApi = new Sib.TransactionalEmailsApi();
 
     const sender = { email:'asadworkemail@gmail.com', name:'asad tanvir shami' }
@@ -150,19 +152,9 @@ routes.post("/sendMail", async (req, res)   => {
     transEmailApi.sendTransacEmail({
       sender,
       to: recievers,
-      subject:'We are hiring!',
+      subject:`${subject}`,
       //textContent:'Wishing you a warm welcome to Hail Technologies',
-      htmlContent:`
-      <p>Hello {{params.firstname}} {{params.lastname}},</p>
-      <p>We have an on going recruitment in {{params.region}},Canada.</p>
-      <p>We are glad to tell you that you are selected for the interview at our company.</p>
-      <p >As we are hiring {{params.field}} in our company</p>
-      <br/>
-      <p>We will send you the timing within this week.</p>
-      <br/>
-      <p>Regards</p>
-      <p>Recruitment Team</p>
-      `,
+      htmlContent:`${txt_body}`,
       params:{
         email:email,
         field:field,
