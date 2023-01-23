@@ -137,16 +137,18 @@ routes.post("/sendMail", async (req, res)   => {
     const sent_date = req.body.sent_date;
     const subject = req.body.subject;
     const txt_body = req.body.txt_body
+    const senderEmail = req.body.sender
+    const emailSentBy = req.body.emailSentBy
     
     const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
     res.send([EntriesData])
    
     const client = Sib.ApiClient.instance
     const apiKey = client.authentications['api-key'];
-    apiKey.apiKey = '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';
+    apiKey.apiKey = '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';
     const transEmailApi = new Sib.TransactionalEmailsApi();
 
-    const sender = { email:'asadworkemail@gmail.com', name:'asad tanvir shami' }
+    const sender = { email:`${emailSentBy}`, name:`${senderEmail}` }
     const recievers = [ { email:email, }, ];
 
     transEmailApi.sendTransacEmail({
@@ -164,6 +166,7 @@ routes.post("/sendMail", async (req, res)   => {
       },
     })
 })
+
 routes.post("/updateNotification", async (req, res)   => {
     const id = req.body.id
     console.log(id)
