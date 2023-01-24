@@ -11,7 +11,7 @@ generateAccessToken = (authUser) => {
       lastname: authUser.lastname,
     },
     "mysecretkey",
-    { expiresIn: "15m" }
+    { expiresIn: "24hr" }
   );
 };
 

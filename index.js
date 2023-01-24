@@ -4,9 +4,9 @@ const cookieParser = require("cookie-parser")
 const app = express();
 const bodyParser = require('body-parser');
 var morgan = require('morgan');
-const db = require("./models");
 const session = require("express-session")
 
+const db = require("./models");
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const entryRoutes = require('./routes/entryRoutes');

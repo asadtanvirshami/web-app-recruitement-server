@@ -1,6 +1,7 @@
 const routes = require("express").Router();
 const { Entries } = require("../../models")
 const { Op }= require("sequelize");
+const nodemailer = require("nodemailer");
 const Sib = require('sib-api-v3-sdk')
 
 routes.post("/createEntries", async (req, res) => {
@@ -126,13 +127,10 @@ routes.delete("/deleteEntry", async (req, res)  => {
 })
 
 routes.post("/sendMail", async (req, res)   => {
-    console.log(req.body)
+  console.log('body',req.body)
+
     const id = req.body.id
     const email = req.body.email
-    const field = req.body.field
-    const firstname  = req.body.firstname
-    const lastname  = req.body.lastname
-    const region = req.body.region;
     const sent_day = req.body.sent_day;
     const sent_date = req.body.sent_date;
     const subject = req.body.subject;
@@ -140,31 +138,38 @@ routes.post("/sendMail", async (req, res)   => {
     const senderEmail = req.body.sender
     const emailSentBy = req.body.emailSentBy
     
-    const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
-    res.send([EntriesData])
-   
-    const client = Sib.ApiClient.instance
-    const apiKey = client.authentications['api-key'];
-    apiKey.apiKey = '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';
-    const transEmailApi = new Sib.TransactionalEmailsApi();
+  if(emailSentBy.includes('@gmail.com') && senderEmail !=null ){
+  const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
+  res.send([EntriesData]) } 
+  else{
+    console.log('not send')
+  }
 
-    const sender = { email:`${emailSentBy}`, name:`${senderEmail}` }
-    const recievers = [ { email:email, }, ];
+  let transporter = nodemailer.createTransport({
+    host: "smtp-relay.sendinblue.com",
+    port: 587,
+    secureConnection: false, 
+    secure: false,
+    auth: {
+      user: 'asadtanvir20@gmail.com', 
+      pass: 'xsmtpsib-22dbee49663c23dee89e63c8716e5ec0b3cc311ba70b70e535ed20ce5e44f741-BFIWkcjs9HgZmzNT',
+    },
+  });
+  if(emailSentBy.includes('@gmail.com') && senderEmail !=null ){
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    // from: '"Fred Foo" <atherq16@gmail.com>', // sender address
+    from: `"${senderEmail}" <${emailSentBy}>`, // sender address
+    to: `${email}`, // list of receivers
+    subject: `${subject}`, // Subject line
+    html: `${txt_body}`, // html body
+  });
 
-    transEmailApi.sendTransacEmail({
-      sender,
-      to: recievers,
-      subject:`${subject}`,
-      //textContent:'Wishing you a warm welcome to Hail Technologies',
-      htmlContent:`${txt_body}`,
-      params:{
-        email:email,
-        field:field,
-        region:region,
-        firstname:firstname,
-        lastname:lastname
-      },
-    })
+  console.log("Message sent: %s", info.messageId);
+  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  } else{
+    console.log('not send')
+  }
 })
 
 routes.post("/updateNotification", async (req, res)   => {
