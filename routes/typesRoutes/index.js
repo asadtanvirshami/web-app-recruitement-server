@@ -7,7 +7,7 @@ routes.post("/setoptions", async (req, res) => {
      const Res = await Types.create({
     cities:`${[req.body.name]}`
     },{where:{ id: `${id}` }})
-      res.send({message:"Success"})
+      res.status.send(200)
     } catch (error) {
       console.log(); 
       res.send(error);
@@ -15,7 +15,6 @@ routes.post("/setoptions", async (req, res) => {
   });
 
 routes.post("/updateoptions", async (req, res) => {
-    console.log(req.body)
     const type = req.body.type
     try {   
       if(type=='categories'){
@@ -53,10 +52,9 @@ routes.post("/updateoptions", async (req, res) => {
   });
   
 routes.get("/getoptions", async (req, res) => {
-    console.log(req.body)
     try {
      const Res = await Types.findAll()
-      res.send(Res)
+      res.send(Res).status(200)
     } catch (error) {
       console.log(); 
       res.send(error);

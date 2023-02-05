@@ -96,7 +96,7 @@ routes.get("/getListMail", async (req, res) => {
   if (List === null) {
     console.log('Not found!');
   } else {
-    res.json(List); // true
+    res.send(List); // true
   }
 });
 
@@ -140,52 +140,38 @@ try{
   if (List === null) {
     console.log('Not found!');
   } else {
-    res.send(List); //true
+    res.send(List).status(200)
   } }catch(e){
     console.log(e)
   }
 })
 
-routes.get("/getOptionSets", async (req, res)=>{
-try{
-  const [ data ] = await Promise.all([
-    Resources.findAll(), 
-    Experience.findAll(),
-    Fields.findAll(),
-    Sources.findAll(),
-    City.findAll(),
-    Region.findAll(),
-    SecurityClearence.findAll()
-  ]).then((r)=>{
-    res.send(r)
-  })
-} catch(e) {
-  console.log('none')
-}
-})
-
-routes.get("/getListMailBySearch", async (req, res) => {
- let searchRecord = req.headers.searchkeyword
-  console.log(req.headers.searchkeyword)
-  const response = await Entries.findAll({
-  where:{[Op.or]: [ {firstname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-                    {lastname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-                    {field:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-                    {region:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-                    {city:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-                  ],}}) 
-  res.send([response])
-});
+// routes.get("/getListMailBySearch", async (req, res) => {
+//  let searchRecord = req.headers.searchkeyword
+//   console.log(req.headers.searchkeyword)
+//   const response = await Entries.findAll({
+//   where:{[Op.or]: [ {firstname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {lastname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {field:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {region:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {city:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                   ],}}) 
+//   res.send([response])
+// });
 
 routes.get("/getListSentMail", async (req, res)  => {
+  try{
   const List = await Entries.findAll({where: {show_notification:true},force: true})
-  res.send([List])
+  res.send(List).status(200)
+  }catch(e){
+    console.log(err)
+  }
 })
 
 routes.delete("/deleteEntry", async (req, res)  => {
   const id = req.headers.id;
   const deleteEntry = await Entries.destroy({where: { id:`${id}`,},force: true})
-  res.send([deleteEntry])
+  res.status(200).send(deleteEntry)
 })
 
 routes.post("/sendMail", async (req, res)   => {
@@ -199,12 +185,14 @@ routes.post("/sendMail", async (req, res)   => {
     const txt_body = req.body.txt_body
     const senderEmail = req.body.sender
     const emailSentBy = req.body.emailSentBy
-    
+  try{
+
   if(emailSentBy.includes('@invisorsoft.ca') && senderEmail !=null ){
   const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
-  res.send([EntriesData]) } 
+  res.status(200).send(EntriesData) 
+  } 
   else{
-    console.log('not send')
+    console.log(res.statusCode(304))
   }
 
   let transporter = nodemailer.createTransport({
@@ -220,18 +208,19 @@ routes.post("/sendMail", async (req, res)   => {
   if(emailSentBy.includes( '@invisorsoft.ca') && senderEmail !=null ){
 
   let info = await transporter.sendMail({
-    // from: '"Fred Foo" <atherq16@gmail.com>', // sender address
-    from: `"${senderEmail}" <${emailSentBy}>`, // sender address
-    to: `${email}`, // list of receivers
-    subject: `${subject}`, // Subject line
-    html: `${txt_body}`, // html body
-    
+    from: `"${senderEmail}" <${emailSentBy}>`,
+    to: `${email}`,
+    subject: `${subject}`, 
+    html: `${txt_body}`, 
   });
-  console.log("Message sent: %s", info.messageId);
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  // console.log("Message sent: %s", info.messageId);
+  // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   } else{
     console.log('not send')
   }
+}catch(e){
+  console.log(e)
+}
 })
 
 routes.post("/updateNotification", async (req, res)   => {
@@ -240,9 +229,8 @@ routes.post("/updateNotification", async (req, res)   => {
   const status = false
   try {
     const EntriesData = await Entries.update( {show_notification:false}, {where:{ id: `${id}`}});
-     res.send([EntriesData])
+     res.status(200).send(EntriesData)
    } catch (error) {
-     console.log(); // fields contains extra meta data about results, if available
      res.send(error);
    }
 })
