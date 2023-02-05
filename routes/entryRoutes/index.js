@@ -1,43 +1,39 @@
 const routes = require("express").Router();
-const { Entries } = require("../../models")
+const { Entries} = require("../../models")
 const { Op }= require("sequelize");
 const nodemailer = require("nodemailer");
-const Sib = require('sib-api-v3-sdk')
 
 routes.post("/createEntries", async (req, res) => {
-  console.log(req.body)
+  console.log(req.body.data)
   // using same variable name as used in frontend
-  const firstname = req.body.firstname;
-  const lastname = req.body.lastname;
-  const email = req.body.email;
-  const linkedIn = req.body.linkedIn;
-  const phone = req.body.phone;
-  const field = req.body.field;
-  const experience = req.body.experience;
-  const region = req.body.region;
-  const city = req.body.city;
-  const security_clearence = req.body.sc;
-  const comments = req.body.comments;
-  const source = req.body.source;
-  const source_link = req.body.source_link;
-  const resources = req.body.resources;
+  const firstname = req.body.data.firstname;
+  const lastname = req.body.data.lastname;
+  const email = req.body.data.email;
+  const phone = req.body.data.phone;
+  const field = req.body.data.field;
+  const experience = req.body.data.experience;
+  const region = req.body.data.region;
+  const city = req.body.data.city;
+  const security_clearence = req.body.data.security_clearence;
+  const comments = req.body.data.comments;
+  const source = req.body.data.source;
+  const source_link = req.body.data.source_link;
+  const resources = req.body.data.resources;
 
   // we set if else statement to check if email exists or not or the space is empty
   try {
    const EntriesData = await Entries.create({
-        firstname: `${firstname}`,
-        lastname: `${lastname}`,
+        name: `${firstname}` +" "+ `${lastname}`,
         email: `${email}`,
-        linkedIn: `${linkedIn}`,
         phone: `${phone}`,
-        field: `${field}`,
+        category: `${field}`,
         city: `${city}`,
         security_clearence: `${security_clearence}`,
         experience: `${experience}`,
         region: `${region}`,
         source:`${source}`,
         source_link:`${source_link}`,
-        resources:`${resources}`,
+        resource:`${resources}`,
         comments:`${comments}`,
     })
     res.send({message:"Success"})
@@ -48,29 +44,28 @@ routes.post("/createEntries", async (req, res) => {
 });
 
 routes.post("/updateEntries", async (req, res) => {
+  console.log(req.body)
   // using same variable name as used in frontend
-  const id = req.body.id
-  const firstname = req.body.firstname;
-  const lastname = req.body.lastname;
-  const email = req.body.email;
-  const linkedIn = req.body.linkedIn;
-  const phone = req.body.phone;
-  const field = req.body.field;
-  const experience = req.body.experience;
-  const region = req.body.region;
-  const city = req.body.city;
-  const security_clearence = req.body.sc;
-  const comments = req.body.comments;
-  const source = req.body.source;
-  const source_link = req.body.source_link;
-  const resources = req.body.resources;
+  const id = req.body.data.id
+  const name = req.body.data.name
+  const email = req.body.data.email;
+  const linkedIn = req.body.data.linkedIn;
+  const phone = req.body.data.phone;
+  const field = req.body.data.field;
+  const experience = req.body.data.experience;
+  const region = req.body.data.region;
+  const city = req.body.data.city;
+  const security_clearence = req.body.data.security_clearence;
+  const comments = req.body.data.comments;
+  const source = req.body.data.source;
+  const source_link = req.body.data.source_link;
+  const resources = req.body.data.resources;
 
   // we set if else statement to check if email exists or not or the space is empty
   try {
    const EntriesData = await Entries.update(
     {
-      firstname: `${firstname}`,
-      lastname: `${lastname}`,
+      name:`${name}`,
       email: `${email}`,
       linkedIn: `${linkedIn}`,
       phone: `${phone}`,
@@ -94,13 +89,80 @@ routes.post("/updateEntries", async (req, res) => {
 
 routes.get("/getListMail", async (req, res) => {
 
-  const List = await Entries.findAll();
+  const List = await Entries.findAndCountAll({
+    offset: 0,
+    limit: 10
+  });
   if (List === null) {
     console.log('Not found!');
   } else {
-    res.send([List]); // true
+    res.json(List); // true
   }
 });
+
+routes.get("/getListMailPaginate", async (req, res) => {
+
+  const List = await Entries.findAll();
+  const offset = parseInt(req.headers.offset);
+  const limit = parseInt(req.headers.limit);
+
+  const startIndex = (offset - 1) * limit;
+  const endIndex = offset * limit;
+
+  const results = {};
+  results.next = {
+    offset: offset + 1,
+    limit: limit,
+  };
+  results.previous = {
+    offset: offset - 1,
+    limit: limit,
+  };
+
+  results.List = List.slice(startIndex, endIndex);
+  if (List === null) {
+    console.log('Not found!');
+  } else {
+    res.send([results]); // true
+  }
+});
+
+routes.post("/filterListMail", async (req, res) => {
+try{
+  const List = await Entries.findAll({
+    where:{
+      category:{[Op.substring]: `%${req.body.category.toLowerCase().toUpperCase()}%`},
+      name:{[Op.substring]: `%${req.body.name.toLowerCase().toUpperCase()}%`},
+      email:{[Op.substring]: `%${req.body.email.toLowerCase().toUpperCase()}%`},
+      security_clearence:{[Op.substring]: `%${req.body.sc.toLowerCase().toUpperCase()}%`},
+    }
+  }); 
+  if (List === null) {
+    console.log('Not found!');
+  } else {
+    res.send(List); //true
+  } }catch(e){
+    console.log(e)
+  }
+})
+
+routes.get("/getOptionSets", async (req, res)=>{
+try{
+  const [ data ] = await Promise.all([
+    Resources.findAll(), 
+    Experience.findAll(),
+    Fields.findAll(),
+    Sources.findAll(),
+    City.findAll(),
+    Region.findAll(),
+    SecurityClearence.findAll()
+  ]).then((r)=>{
+    res.send(r)
+  })
+} catch(e) {
+  console.log('none')
+}
+})
 
 routes.get("/getListMailBySearch", async (req, res) => {
  let searchRecord = req.headers.searchkeyword
@@ -138,7 +200,7 @@ routes.post("/sendMail", async (req, res)   => {
     const senderEmail = req.body.sender
     const emailSentBy = req.body.emailSentBy
     
-  if(emailSentBy.includes('@gmail.com') && senderEmail !=null ){
+  if(emailSentBy.includes('@invisorsoft.ca') && senderEmail !=null ){
   const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
   res.send([EntriesData]) } 
   else{
@@ -146,25 +208,25 @@ routes.post("/sendMail", async (req, res)   => {
   }
 
   let transporter = nodemailer.createTransport({
-    host: "smtp-relay.sendinblue.com",
-    port: 587,
-    secureConnection: false, 
+    // host: "smtp-relay.sendinblue.com",
+    host: "mail.invisorsoft.ca",
+    port: 25,
     secure: false,
     auth: {
-      user: 'asadtanvir20@gmail.com', 
-      pass: 'xsmtpsib-22dbee49663c23dee89e63c8716e5ec0b3cc311ba70b70e535ed20ce5e44f741-BFIWkcjs9HgZmzNT',
+      user: 'info@invisorsoft.ca', 
+      pass: 'Canada@0214',
     },
   });
-  if(emailSentBy.includes('@gmail.com') && senderEmail !=null ){
-  // send mail with defined transport object
+  if(emailSentBy.includes( '@invisorsoft.ca') && senderEmail !=null ){
+
   let info = await transporter.sendMail({
     // from: '"Fred Foo" <atherq16@gmail.com>', // sender address
     from: `"${senderEmail}" <${emailSentBy}>`, // sender address
     to: `${email}`, // list of receivers
     subject: `${subject}`, // Subject line
     html: `${txt_body}`, // html body
+    
   });
-
   console.log("Message sent: %s", info.messageId);
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   } else{
@@ -173,18 +235,16 @@ routes.post("/sendMail", async (req, res)   => {
 })
 
 routes.post("/updateNotification", async (req, res)   => {
-    const id = req.body.id
-    console.log(id)
-    const status = false
-    try {
-      const EntriesData = await Entries.update( {show_notification:false}, {where:{ id: `${id}`}});
-       res.send([EntriesData])
-     } catch (error) {
-       console.log(); // fields contains extra meta data about results, if available
-       res.send(error);
-     }
+  const id = req.body.id
+  console.log(id)
+  const status = false
+  try {
+    const EntriesData = await Entries.update( {show_notification:false}, {where:{ id: `${id}`}});
+     res.send([EntriesData])
+   } catch (error) {
+     console.log(); // fields contains extra meta data about results, if available
+     res.send(error);
+   }
 })
-
-
 
 module.exports = routes;

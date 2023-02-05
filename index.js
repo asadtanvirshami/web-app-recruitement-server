@@ -10,6 +10,7 @@ const db = require("./models");
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const entryRoutes = require('./routes/entryRoutes');
+const TypesRoutes = require('./routes/typesRoutes');
 
 app.use(morgan('tiny'));
 app.use(express.json());
@@ -33,7 +34,6 @@ app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));
 app.use(bodyParser.json({limit: '100mb', extended: true}));
 app.use(express.urlencoded({ extended: true }));
 
-
 db.sequelize.sync();
 
 app.get("/", (req, res) => { res.json('Welcome to web application Server') });
@@ -41,8 +41,7 @@ app.get("/", (req, res) => { res.json('Welcome to web application Server') });
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/entries", entryRoutes);
-
-
+app.use("/types", TypesRoutes);
 
 var PORT = process.env.PORT || 8080
 

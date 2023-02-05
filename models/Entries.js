@@ -10,39 +10,19 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true
             }
         },
-        firstname:{
+        name:{
             type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        lastname:{
-            type:DataTypes.STRING,
-            allowNyll: false,
+            allowNull: false,
            
         },
         email:{
             type:DataTypes.STRING,
-            allowNyll: false,
+            allowNull: false,
           
         },
         phone:{
             type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        source:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        source_link:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        resources:{
-            type:DataTypes.STRING,
-            allowNyll: false,
+            allowNull: false,
            
         },
         comments:{
@@ -50,24 +30,24 @@ module.exports = (sequelize, DataTypes) => {
             allowNyll: false,
            
         },
-        field:{
+        source:{
             type:DataTypes.STRING,
-            allowNyll: false,
+            allowNull: false,
+           
+        },
+        source_link:{
+            type:DataTypes.STRING,
+            allowNull: false,
+           
+        },
+        category:{
+            type:DataTypes.STRING,
+            allowNull: false,
            
         },
         security_clearence:{
             type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        experience:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        city:{
-            type:DataTypes.STRING,
-            allowNyll: false,
+            allowNull: false,
            
         },
         region:{
@@ -75,9 +55,24 @@ module.exports = (sequelize, DataTypes) => {
             allowNyll: false,
            
         },
-        status:{
+        city:{
+            type:DataTypes.STRING,
+            allowNull: false,
+           
+        },
+        experience:{
             type:DataTypes.STRING,
             allowNyll: false,
+           
+        },
+        status:{
+            type:DataTypes.STRING,
+            allowNull: true,
+           
+        },
+        resource:{
+            type:DataTypes.STRING,
+            allowNull: false,
            
         },
         show_notification:{
