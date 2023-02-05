@@ -170,8 +170,12 @@ routes.get("/getListSentMail", async (req, res)  => {
 
 routes.delete("/deleteEntry", async (req, res)  => {
   const id = req.headers.id;
+  try{
   const deleteEntry = await Entries.destroy({where: { id:`${id}`,},force: true})
-  res.status(200).send(deleteEntry)
+  res.send([deleteEntry])
+  }catch(e){
+    console.log(e)
+  }
 })
 
 routes.post("/sendMail", async (req, res)   => {
