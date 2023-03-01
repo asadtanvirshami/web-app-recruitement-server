@@ -1,9 +1,11 @@
 const routes = require("express").Router();
-const { Entries} = require("../../models")
 const { Op }= require("sequelize");
 const nodemailer = require("nodemailer");
 
-routes.post("/createEntries", async (req, res) => {
+const { Consultants} = require("../../models")
+const{Users, History} = require("../../functions/associations/historyAssociations")
+
+routes.post("/createConsultants", async (req, res) => {
   console.log(req.body.data)
   // using same variable name as used in frontend
   const firstname = req.body.data.firstname;
@@ -22,7 +24,7 @@ routes.post("/createEntries", async (req, res) => {
 
   // we set if else statement to check if email exists or not or the space is empty
   try {
-   const EntriesData = await Entries.create({
+   const ConsultantsInfo = await Consultants.create({
         name: `${firstname}` +" "+ `${lastname}`,
         email: `${email}`,
         phone: `${phone}`,
@@ -43,7 +45,7 @@ routes.post("/createEntries", async (req, res) => {
   }
 });
 
-routes.post("/updateEntries", async (req, res) => {
+routes.post("/updateConsultants", async (req, res) => {
   console.log(req.body)
   // using same variable name as used in frontend
   const id = req.body.data.id
@@ -63,7 +65,7 @@ routes.post("/updateEntries", async (req, res) => {
 
   // we set if else statement to check if email exists or not or the space is empty
   try {
-   const EntriesData = await Entries.update(
+   const ConsultantsInfo = await Consultants.update(
     {
       name:`${name}`,
       email: `${email}`,
@@ -80,36 +82,38 @@ routes.post("/updateEntries", async (req, res) => {
       comments:`${comments}`,
     }, 
     {where:{ id: `${id}` }});
-    res.send([EntriesData])
+    res.send([ConsultantsInfo])
   } catch (error) {
     console.log(); // fields contains extra meta data about results, if available
     res.send(error);
   }
 });
 
-routes.get("/getListMail", async (req, res) => {
+routes.get("/getListOfConsultants", async (req, res) => {
 
-  const List = await Entries.findAndCountAll({
+  const ConsultantsInfo = await Consultants.findAndCountAll({
     offset: 0,
     limit: 10
   });
-  if (List === null) {
+  if (ConsultantsInfo === null) {
     console.log('Not found!');
   } else {
-    res.send(List); // true
+    res.send(ConsultantsInfo); // true
   }
 });
 
-routes.get("/getListMailPaginate", async (req, res) => {
-
-  const List = await Entries.findAll();
-  const offset = parseInt(req.headers.offset);
-  const limit = parseInt(req.headers.limit);
-
-  const startIndex = (offset - 1) * limit;
-  const endIndex = offset * limit;
+routes.get("/getListOfConsultantsPaginate", async (req, res) => {
+try{
+  const offset = parseInt(req.headers.offset)||0;
+  const limit = parseInt(req.headers.limit)||10;
+  
+  const ConsultantsInfo = await Consultants.findAndCountAll({
+    offset:offset,
+    limit:limit
+  });
 
   const results = {};
+
   results.next = {
     offset: offset + 1,
     limit: limit,
@@ -118,18 +122,25 @@ routes.get("/getListMailPaginate", async (req, res) => {
     offset: offset - 1,
     limit: limit,
   };
+  
+  results.total = ConsultantsInfo.count;
+  results.ConsultantsInfo = ConsultantsInfo.rows
 
-  results.List = List.slice(startIndex, endIndex);
-  if (List === null) {
+  if (ConsultantsInfo === null) {
     console.log('Not found!');
   } else {
     res.send([results]); // true
   }
+
+} catch(e){
+  console.log(e)
+}
 });
 
-routes.post("/filterListMail", async (req, res) => {
+routes.post("/filterConsultantsList", async (req, res) => {
+  console.log(req.body)
 try{
-  const List = await Entries.findAll({
+  const ConsultantsInfo = await Consultants.findAll({
     where:{
       category:{[Op.substring]: `%${req.body.category.toLowerCase().toUpperCase()}%`},
       name:{[Op.substring]: `%${req.body.name.toLowerCase().toUpperCase()}%`},
@@ -137,42 +148,20 @@ try{
       security_clearence:{[Op.substring]: `%${req.body.sc.toLowerCase().toUpperCase()}%`},
     }
   }); 
-  if (List === null) {
+  if (ConsultantsInfo === null) {
     console.log('Not found!');
   } else {
-    res.send(List).status(200)
+    res.send(ConsultantsInfo).status(200)
   } }catch(e){
     console.log(e)
   }
 })
 
-// routes.get("/getListMailBySearch", async (req, res) => {
-//  let searchRecord = req.headers.searchkeyword
-//   console.log(req.headers.searchkeyword)
-//   const response = await Entries.findAll({
-//   where:{[Op.or]: [ {firstname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-//                     {lastname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-//                     {field:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-//                     {region:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-//                     {city:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
-//                   ],}}) 
-//   res.send([response])
-// });
-
-routes.get("/getListSentMail", async (req, res)  => {
-  try{
-  const List = await Entries.findAll({where: {show_notification:true},force: true})
-  res.send(List).status(200)
-  }catch(e){
-    console.log(err)
-  }
-})
-
-routes.delete("/deleteEntry", async (req, res)  => {
+routes.delete("/deleteConsultant", async (req, res)  => {
   const id = req.headers.id;
   try{
-  const deleteEntry = await Entries.destroy({where: { id:`${id}`,},force: true})
-  res.send([deleteEntry])
+  const deleteConsultant = await Consultants.destroy({where: { id:`${id}`,},force: true})
+  res.send([deleteConsultant])
   }catch(e){
     console.log(e)
   }
@@ -181,51 +170,93 @@ routes.delete("/deleteEntry", async (req, res)  => {
 routes.post("/sendMail", async (req, res)   => {
   console.log('body',req.body)
 
-    const id = req.body.id
-    const email = req.body.email
-    const sent_day = req.body.sent_day;
-    const sent_date = req.body.sent_date;
-    const subject = req.body.subject;
-    const txt_body = req.body.txt_body
-    const senderEmail = req.body.sender
-    const emailSentBy = req.body.emailSentBy
-  try{
+    var promises = (req.body).map((rqBody)=>{
+      return History.create({
+        sent_day:rqBody.sent_day,
+        sent_date:rqBody.sent_date,
+        ConsultantId:rqBody.id,
+        UserId:rqBody.userId,
+      })
+    })
+    try {
+        const result = await Promise.all(promises)
+        res.send(result);
+    
+    
+ 
+    // const SaveInHistory = History.create(
+    //   {
+    //     sent_date:sent_date,
+    //     sent_day:sent_day,
+    //     ConsultantId: id,
+    //     UserId: userId
+    //   })
+    // res.sendStatus(200)
 
-  if(emailSentBy.includes('@invisorsoft.ca') && senderEmail !=null ){
-  const EntriesData = await Entries.update( {status: "Sent", sent_day:`${sent_day}`,sent_date:`${sent_date}`,show_notification:true}, {where:{ id: `${id}` }});
-  res.status(200).send(EntriesData) 
-  } 
-  else{
-    console.log(res.statusCode(304))
-  }
-
-  let transporter = nodemailer.createTransport({
-    // host: "smtp-relay.sendinblue.com",
-    host: "mail.invisorsoft.ca",
-    port: 25,
-    secure: false,
-    auth: {
-      user: 'info@invisorsoft.ca', 
-      pass: 'Canada@0214',
-    },
-  });
-  if(emailSentBy.includes( '@invisorsoft.ca') && senderEmail !=null ){
-
-  let info = await transporter.sendMail({
-    from: `"${senderEmail}" <${emailSentBy}>`,
-    to: `${email}`,
-    subject: `${subject}`, 
-    html: `${txt_body}`, 
-  });
+  // let transporter = nodemailer.createTransport({
+  //   // host: "smtp-relay.sendinblue.com",
+  //   host: "",
+  //   port: 25,
+  //   secure: false,
+  //   auth: {
+  //     user: '', 
+  //     pass: '',
+  //   },
+  // })
+  // let info = await transporter.sendMail({
+  //   from: `"${senderName}" <${emailSentBy}>`,
+  //   to: `${email}`,
+  //   subject: `${subject}`, 
+  //   html: `${txt_body}`, 
+  // });
   // console.log("Message sent: %s", info.messageId);
   // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-  } else{
-    console.log('not send')
-  }
-}catch(e){
-  console.log(e)
-}
+  // } else{
+  //   console.log('not send')
+  
+} catch (error) {
+  res.send(error);
+ }
 })
+
+routes.get("/getMailHistory", async (req, res) => {
+  try{
+      const offset = parseInt(req.headers.offset)||0;
+      const limit = parseInt(req.headers.limit)||10;
+      
+      const mailHistory = await History.findAndCountAll({
+        offset:offset,
+        limit:limit,
+        includes:[
+          {model:Users},
+        ]
+      });
+    
+      const results = {};
+    
+      results.next = {
+        offset: offset + 1,
+        limit: limit,
+      };
+      results.previous = {
+        offset: offset - 1,
+        limit: limit,
+      };
+      
+      results.total = mailHistory.count;
+      results.mailHistory = mailHistory.rows
+    
+      if (mailHistory === null) {
+        console.log('Not found!');
+      } else {
+        res.send([results]); // true
+      }
+
+    } catch(e){
+      console.log(e)
+    }
+});
+
 
 routes.post("/updateNotification", async (req, res)   => {
   const id = req.body.id
@@ -240,3 +271,16 @@ routes.post("/updateNotification", async (req, res)   => {
 })
 
 module.exports = routes;
+
+// routes.get("/getListMailBySearch", async (req, res) => {
+//  let searchRecord = req.headers.searchkeyword
+//   console.log(req.headers.searchkeyword)
+//   const response = await Entries.findAll({
+//   where:{[Op.or]: [ {firstname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {lastname:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {field:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {region:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                     {city:{[Op.substring]:`${searchRecord.toLowerCase().toUpperCase()}`}},
+//                   ],}}) 
+//   res.send([response])
+// });

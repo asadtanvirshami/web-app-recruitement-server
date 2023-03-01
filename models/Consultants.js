@@ -1,6 +1,6 @@
 
 module.exports = (sequelize, DataTypes) => {
-    const Users = sequelize.define("Entries", {
+    const Consultants = sequelize.define("Consultants", {
         id: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
@@ -75,23 +75,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
            
         },
-        show_notification:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        sent_day:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
-        sent_date:{
-            type:DataTypes.STRING,
-            allowNyll: false,
-           
-        },
     });
 
 
-    return Users ;
+    return Consultants ;
 };

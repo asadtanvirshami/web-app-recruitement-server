@@ -19,8 +19,9 @@ routes.post("/loginAuth", async function (req, res) {
   // using same variable name as used in frontend
   // destructuring
   const { email, password } = req.body;
-  const authUser = await Users.findOne({ where: { email: email } });
 
+try{  
+  const authUser = await Users.findOne({ where: { email: email } });
   if (!authUser) {
     res.send({ message: "Failed" });
   } else if (authUser.password !== password) {
@@ -37,14 +38,21 @@ routes.post("/loginAuth", async function (req, res) {
       auth: true,
     });
   }
+  }catch(e){
+    res.json({message:"Error occured"})
+  }
 });
 
 
 routes.get("/loginUser", (req, res) => {
+  try{
   if (req.session.user) {
     res.send({ loggedIn: true, email: req.session.email });
   } else {
     res.send({ loggedIn: false });
+  }
+  }catch(e){
+    res.json({message:"Error occured"})
   }
 });
 

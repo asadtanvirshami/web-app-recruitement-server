@@ -9,8 +9,9 @@ const session = require("express-session")
 const db = require("./models");
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
-const entryRoutes = require('./routes/entryRoutes');
-const TypesRoutes = require('./routes/typesRoutes');
+const consultantRoutes = require('./routes/consultantRoutes');
+const typesRoutes = require('./routes/typesRoutes');
+const historyRoutes = require('./routes/historyRoutes');
 
 app.use(morgan('tiny'));
 app.use(express.json());
@@ -40,8 +41,9 @@ app.get("/", (req, res) => { res.json('Welcome to web application Server') });
 
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
-app.use("/entries", entryRoutes);
-app.use("/types", TypesRoutes);
+app.use("/consultants", consultantRoutes);
+app.use("/types", typesRoutes);
+app.use("/history", historyRoutes);
 
 var PORT = process.env.PORT || 8080
 
