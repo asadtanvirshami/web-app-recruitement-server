@@ -7,7 +7,7 @@ const{Users, History} = require("../../functions/associations/historyAssociation
 
 routes.post("/createConsultants", async (req, res) => {
   console.log(req.body.data)
-  // using same variable name as used in frontend
+
   const firstname = req.body.data.firstname;
   const lastname = req.body.data.lastname;
   const email = req.body.data.email;
@@ -22,7 +22,6 @@ routes.post("/createConsultants", async (req, res) => {
   const source_link = req.body.data.source_link;
   const resources = req.body.data.resources;
 
-  // we set if else statement to check if email exists or not or the space is empty
   try {
    const ConsultantsInfo = await Consultants.create({
         name: `${firstname}` +" "+ `${lastname}`,
@@ -40,14 +39,13 @@ routes.post("/createConsultants", async (req, res) => {
     })
     res.send({message:"Success"})
   } catch (error) {
-    console.log(); // fields contains extra meta data about results, if available
     res.send(error);
   }
 });
 
 routes.post("/updateConsultants", async (req, res) => {
   console.log(req.body)
-  // using same variable name as used in frontend
+
   const id = req.body.data.id
   const name = req.body.data.name
   const email = req.body.data.email;
@@ -63,7 +61,6 @@ routes.post("/updateConsultants", async (req, res) => {
   const source_link = req.body.data.source_link;
   const resources = req.body.data.resources;
 
-  // we set if else statement to check if email exists or not or the space is empty
   try {
    const ConsultantsInfo = await Consultants.update(
     {
@@ -84,78 +81,51 @@ routes.post("/updateConsultants", async (req, res) => {
     {where:{ id: `${id}` }});
     res.send([ConsultantsInfo])
   } catch (error) {
-    console.log(); // fields contains extra meta data about results, if available
     res.send(error);
   }
 });
 
 routes.get("/getListOfConsultants", async (req, res) => {
+  try{
+      const offset = parseInt(req.headers.offset)||0;
+      const limit = parseInt(req.headers.limit)||10;        
+      
+      const ConsultantsInfo = await Consultants.findAndCountAll({
+        where:{
+          category:{[Op.substring]: `%${req.headers.category||''}%`},
+          security_clearence:{[Op.substring]: `%${req.headers.sc||''}%`},
+          name:{[Op.substring]: `%${req.headers.name||''}%`},
+          email:{[Op.substring]: `%${req.headers.email||''}%`},
+        },
+        offset:offset,
+        limit:limit
+      });
 
-  const ConsultantsInfo = await Consultants.findAndCountAll({
-    offset: 0,
-    limit: 10
-  });
-  if (ConsultantsInfo === null) {
-    console.log('Not found!');
-  } else {
-    res.send(ConsultantsInfo); // true
-  }
-});
+      const results = {};
+    
+      results.next = {
+        offset: offset + 1,
+        limit: 10,
+      };
+      results.previous = {
+        offset: offset - 1,
+        limit: limit,
+      };
+      
+      results.total = ConsultantsInfo.count;
+      
+      results.consultants = ConsultantsInfo.rows
+    
+      if (ConsultantsInfo === null) {
+        console.log('Not found!');
+      } else {
+        res.send([results]); // true
+      }
 
-routes.get("/getListOfConsultantsPaginate", async (req, res) => {
-try{
-  const offset = parseInt(req.headers.offset)||0;
-  const limit = parseInt(req.headers.limit)||10;
-  
-  const ConsultantsInfo = await Consultants.findAndCountAll({
-    offset:offset,
-    limit:limit
-  });
-
-  const results = {};
-
-  results.next = {
-    offset: offset + 1,
-    limit: limit,
-  };
-  results.previous = {
-    offset: offset - 1,
-    limit: limit,
-  };
-  
-  results.total = ConsultantsInfo.count;
-  results.ConsultantsInfo = ConsultantsInfo.rows
-
-  if (ConsultantsInfo === null) {
-    console.log('Not found!');
-  } else {
-    res.send([results]); // true
-  }
-
-} catch(e){
-  console.log(e)
-}
-});
-
-routes.post("/filterConsultantsList", async (req, res) => {
-  console.log(req.body)
-try{
-  const ConsultantsInfo = await Consultants.findAll({
-    where:{
-      category:{[Op.substring]: `%${req.body.category.toLowerCase().toUpperCase()}%`},
-      name:{[Op.substring]: `%${req.body.name.toLowerCase().toUpperCase()}%`},
-      email:{[Op.substring]: `%${req.body.email.toLowerCase().toUpperCase()}%`},
-      security_clearence:{[Op.substring]: `%${req.body.sc.toLowerCase().toUpperCase()}%`},
+    } catch(e){
+      console.log(e)
     }
-  }); 
-  if (ConsultantsInfo === null) {
-    console.log('Not found!');
-  } else {
-    res.send(ConsultantsInfo).status(200)
-  } }catch(e){
-    console.log(e)
-  }
-})
+});
 
 routes.delete("/deleteConsultant", async (req, res)  => {
   const id = req.headers.id;
@@ -257,19 +227,6 @@ routes.get("/getMailHistory", async (req, res) => {
     }
 });
 
-
-routes.post("/updateNotification", async (req, res)   => {
-  const id = req.body.id
-  console.log(id)
-  const status = false
-  try {
-    const EntriesData = await Entries.update( {show_notification:false}, {where:{ id: `${id}`}});
-     res.status(200).send(EntriesData)
-   } catch (error) {
-     res.send(error);
-   }
-})
-
 module.exports = routes;
 
 // routes.get("/getListMailBySearch", async (req, res) => {
@@ -284,3 +241,23 @@ module.exports = routes;
 //                   ],}}) 
 //   res.send([response])
 // });
+
+// routes.post("/filterConsultantsList", async (req, res) => {
+//   console.log(req.body)
+// try{
+//   const ConsultantsInfo = await Consultants.findAll({
+//     where:{
+//       category:{[Op.substring]: `%${req.body.category.toLowerCase().toUpperCase()}%`},
+//       name:{[Op.substring]: `%${req.body.name.toLowerCase().toUpperCase()}%`},
+//       email:{[Op.substring]: `%${req.body.email.toLowerCase().toUpperCase()}%`},
+//       security_clearence:{[Op.substring]: `%${req.body.sc.toLowerCase().toUpperCase()}%`},
+//     }
+//   }); 
+//   if (ConsultantsInfo === null) {
+//     console.log('Not found!');
+//   } else {
+//     res.send(ConsultantsInfo).status(200)
+//   } }catch(e){
+//     console.log(e)
+//   }
+// })
