@@ -54,10 +54,4 @@ routes.post("/updateUser", async (req, res) => {
   }
 });
 
-// routes.delete("/deleteUser", async (req, res)  => {
-//   const id = req.headers.id;
-//   const deleteEntry = await Users.destroy({where: { id:`${id}`,},force: true})
-//   res.send([deleteEntry])
-// })
-
 module.exports = routes;
